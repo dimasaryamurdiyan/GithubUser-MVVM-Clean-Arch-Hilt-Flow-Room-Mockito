@@ -6,6 +6,7 @@ The app was developed in :
  - Hilt
  - Coroutines
  - Room
+ - Mockito for unit testing
  - Android Min SDK: 21 (Lolipop)
 
 ## Project Structure
