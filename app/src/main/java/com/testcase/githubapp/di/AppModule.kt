@@ -51,7 +51,6 @@ object AppModule {
         return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
     }
 
-
     @Provides
     @Singleton
     fun provideApiService(okHttpClient: OkHttpClient, gson: Gson): ApiService {

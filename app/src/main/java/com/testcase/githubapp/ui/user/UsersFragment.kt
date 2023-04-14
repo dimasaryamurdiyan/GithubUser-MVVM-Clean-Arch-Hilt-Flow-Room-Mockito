@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.testcase.githubapp.R
@@ -18,7 +20,14 @@ import com.testcase.githubapp.databinding.FragmentUsersBinding
 import com.testcase.githubapp.domain.model.Users
 import com.testcase.githubapp.ui.BaseFragment
 import com.testcase.githubapp.ui.user.adapter.UsersAdapter
+import com.testcase.githubapp.utils.textChanges
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 @AndroidEntryPoint
 class UsersFragment : BaseFragment() {
@@ -45,13 +54,19 @@ class UsersFragment : BaseFragment() {
 
     private fun onViewBind() {
         binding.apply {
-            etSearch.doOnTextChanged { text, start, before, count ->
+            etSearch.doAfterTextChanged { text ->
                 val data = text.toString()
-                if(data.isNotEmpty()) {
-                    viewModel.getSearchUsers(data)
-                } else {
-                    viewModel.getUsers()
+                lifecycleScope.launch {
+                    delay(SEARCH_DEBOUNCE_DURATION)
+                    if(data.isNotEmpty()) {
+                        viewModel.getSearchUsers(data)
+                    } else {
+                        viewModel.getUsers()
+                    }
                 }
+            }
+            etSearch.doOnTextChanged { text, start, before, count ->
+
             }
         }
     }
@@ -122,5 +137,9 @@ class UsersFragment : BaseFragment() {
     override fun onResume() {
         super.onResume()
         binding.etSearch.setText("")
+    }
+
+    companion object{
+        const val SEARCH_DEBOUNCE_DURATION = 400L
     }
 }
